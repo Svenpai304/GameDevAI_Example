@@ -11,4 +11,5 @@ public static class VariableNames
     public const string IN_VISION = "IN_VISION";
 
     public const string STATUS_TEXT = "STATUS_TEXT";
+    public const string AUDIO_SOURCE = "AUDIO_SOURCE";
 }

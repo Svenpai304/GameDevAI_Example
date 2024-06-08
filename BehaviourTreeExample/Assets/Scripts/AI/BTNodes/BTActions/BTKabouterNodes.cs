@@ -120,6 +120,7 @@ public class BTStayHidden : BTBaseNode
         }
         if (illusionObject != null && illusionObject.Found)
         {
+            PlaySFX(SFXManager.SFXGroup.KabouterTrick);
             illusionObject.Die(true);
             illusionObject = null;
             return TaskStatus.Success;
@@ -199,7 +200,8 @@ public class BTApproach : BTBaseNode
         {
             if (Physics.Raycast(agent.transform.position, playerDist, playerDist.magnitude))
             {
-                Debug.Log("GOTTEM");
+                PlaySFX(SFXManager.SFXGroup.KabouterAttack);
+                GameManager.Instance.EndGame(false);
                 blackboard.SetVariable(VariableNames.CAN_ATTACK, false);
                 return TaskStatus.Success;
             }
@@ -229,6 +231,7 @@ public class BTRunAway : BTBaseNode
     protected override void OnEnter()
     {
         SetStatusUI("Running away");
+        PlaySFX(SFXManager.SFXGroup.KabouterSpotted);
         agent.transform.LookAt(player.transform.position);
         agent.speed = speed;
     }

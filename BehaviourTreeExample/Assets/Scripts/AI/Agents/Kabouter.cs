@@ -16,6 +16,7 @@ public class Kabouter : MonoBehaviour
     private BTBaseNode tree;
     private NavMeshAgent agent;
     private Animator animator;
+    private AudioSource audioSource;
     public TMP_Text statusText;
 
     private Player player;
@@ -25,6 +26,7 @@ public class Kabouter : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
         player = FindObjectOfType<Player>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Start()
@@ -38,6 +40,7 @@ public class Kabouter : MonoBehaviour
         blackboard.SetVariable(VariableNames.IN_VISION, false);
         blackboard.SetVariable(VariableNames.CAN_ATTACK, false);
         blackboard.SetVariable(VariableNames.STATUS_TEXT, statusText);
+        blackboard.SetVariable(VariableNames.AUDIO_SOURCE, audioSource);
 
         tree =
             new BTConditionalSelector(
@@ -63,7 +66,7 @@ public class Kabouter : MonoBehaviour
     private void Update()
     {
         bool isMoving = !(Mathf.Abs(agent.destination.x - transform.position.x) <= keepDistance && Mathf.Abs(agent.destination.z - transform.position.z) <= keepDistance);
-        ChangeAnimation(isMoving ? "Walk Crouch" : "Crouch Idle", isMoving ? 0.05f : 0.15f);
+        ChangeAnimation(isMoving ? "Run" : "Crouch Idle", isMoving ? 0.05f : 0.15f);
     }
 
     private void ChangeAnimation(string animationName, float fadeTime)

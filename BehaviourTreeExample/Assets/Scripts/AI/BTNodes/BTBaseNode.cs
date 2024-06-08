@@ -45,6 +45,15 @@ public abstract class BTBaseNode
         TMP_Text status = blackboard.GetVariable<TMP_Text>(VariableNames.STATUS_TEXT);
         if (status != null) { status.text = text; }
     }
+
+    protected void PlaySFX(SFXManager.SFXGroup group)
+    {
+        AudioSource src = blackboard.GetVariable<AudioSource>(VariableNames.AUDIO_SOURCE);
+        if(src == null) { return; }
+        src.Stop();
+        src.clip = SFXManager.Instance.GetRandomSFX(group);
+        src.Play();
+    }
 }
 
 public abstract class BTComposite : BTBaseNode
