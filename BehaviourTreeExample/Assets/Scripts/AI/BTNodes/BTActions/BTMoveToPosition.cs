@@ -5,11 +5,11 @@ using UnityEngine.AI;
 
 public class BTMoveToPosition : BTBaseNode
 {
-    private NavMeshAgent agent;
-    private float moveSpeed;
-    private float keepDistance;
-    private Vector3 targetPosition;
-    private string BBtargetPosition;
+    protected NavMeshAgent agent;
+    protected float moveSpeed;
+    protected float keepDistance;
+    protected Vector3 targetPosition;
+    protected string BBtargetPosition;
 
     public BTMoveToPosition(NavMeshAgent agent, float moveSpeed, string BBtargetPosition, float keepDistance)
     {
@@ -21,6 +21,7 @@ public class BTMoveToPosition : BTBaseNode
 
     protected override void OnEnter()
     {
+        SetStatusUI("Moving");
         agent.speed = moveSpeed;
         agent.stoppingDistance = keepDistance;
         targetPosition = blackboard.GetVariable<Vector3>(BBtargetPosition);
@@ -36,7 +37,7 @@ public class BTMoveToPosition : BTBaseNode
             agent.SetDestination(targetPosition);
         }
 
-        if(Vector3.Distance(agent.transform.position, targetPosition) <= keepDistance)
+        if(Mathf.Abs(agent.transform.position.x - targetPosition.x) <= keepDistance && Mathf.Abs(agent.transform.position.z - targetPosition.z) <= keepDistance)
         {
             return TaskStatus.Success;
         }
@@ -61,8 +62,8 @@ public class BTGetNextPatrolPosition : BTBaseNode
         {
             currentIndex = 0;
         }
-        blackboard.SetVariable<int>(VariableNames.CURRENT_PATROL_INDEX, currentIndex);
-        blackboard.SetVariable<Vector3>(VariableNames.TARGET_POSITION, wayPoints[currentIndex].position);
+        blackboard.SetVariable(VariableNames.CURRENT_PATROL_INDEX, currentIndex);
+        blackboard.SetVariable(VariableNames.TARGET_POSITION, wayPoints[currentIndex].position);
     }
 
     protected override TaskStatus OnUpdate()

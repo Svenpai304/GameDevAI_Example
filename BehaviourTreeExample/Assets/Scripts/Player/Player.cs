@@ -8,6 +8,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotationSpeed = 180f;
     [SerializeField] private float moveSpeed = 3;
     [SerializeField] private float deathForce = 1000;
+    [SerializeField] private float visionRange = 8;
+    [SerializeField] private float visionAngle = 30;
+    public LayerMask visionBlockMask;
     [SerializeField] private GameObject ragdoll;
     private Rigidbody rb;
     private Animator animator;
@@ -103,5 +106,15 @@ public class Player : MonoBehaviour
         {
             animator.CrossFade(animationName, fadeTime);
         }
+    }
+
+    public bool CheckPointInVision(Vector3 point)
+    {
+        Vector3 d = point - transform.position;
+        if(Vector3.Distance(point, transform.position) < visionRange && Vector3.Angle(d, transform.forward) < visionAngle)
+        {
+            return !Physics.Raycast(transform.position, d, visionRange, visionBlockMask);
+        }
+            return false;
     }
 }

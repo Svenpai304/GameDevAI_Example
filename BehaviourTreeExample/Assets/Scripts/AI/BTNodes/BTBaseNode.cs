@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public enum TaskStatus { Success, Failed, Running }
@@ -38,6 +39,12 @@ public abstract class BTBaseNode
     protected abstract TaskStatus OnUpdate();
     protected virtual void OnEnter() { }
     protected virtual void OnExit() { }
+
+    protected void SetStatusUI(string text)
+    {
+        TMP_Text status = blackboard.GetVariable<TMP_Text>(VariableNames.STATUS_TEXT);
+        if (status != null) { status.text = text; }
+    }
 }
 
 public abstract class BTComposite : BTBaseNode
