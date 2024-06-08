@@ -72,6 +72,7 @@ public class BTKabouterMove : BTMoveToPosition
 public class BTStayHidden : BTBaseNode
 {
     private float timer;
+    private float exhaustion;
     private float illusionSpawnTime;
     private float attackDistance;
     private Transform[] wayPoints;
@@ -93,11 +94,13 @@ public class BTStayHidden : BTBaseNode
 
     protected override void OnEnter()
     {
+        exhaustion = blackboard.GetVariable<float>(VariableNames.EXHAUSTION);
         SetStatusUI("Hidden");
     }
     protected override TaskStatus OnUpdate()
     {
         timer += Time.fixedDeltaTime;
+        exhaustion = Mathf.Clamp(exhaustion - Time.fixedDeltaTime, 0, exhaustion);
         if (timer > illusionSpawnTime && illusionObject == null)
         {
             SpawnIllusion();
@@ -132,6 +135,7 @@ public class BTStayHidden : BTBaseNode
     {
         base.OnExit();
         timer = 0;
+        blackboard.SetVariable(VariableNames.EXHAUSTION, exhaustion);
         if (illusionObject != null)
         {
             illusionObject.Die(false);
@@ -213,32 +217,47 @@ public class BTApproach : BTBaseNode
 public class BTRunAway : BTBaseNode
 {
     private float timer = 0;
+    private float exhaustion;
     private NavMeshAgent agent;
     private Player player;
     private float waitTime;
     private float finishDistance;
     private float speed;
+    private float tiredSpeed;
+    private float tiredStartTime;
+    private float tiredSpan;
 
-    public BTRunAway(NavMeshAgent agent, Player player, float waitTime, float finishDistance, float speed)
+    public BTRunAway(NavMeshAgent agent, Player player, float waitTime, float finishDistance, float speed, float tiredSpeed, float tiredStartTime, float tiredSpan)
     {
         this.agent = agent;
         this.player = player;
         this.waitTime = waitTime;
         this.finishDistance = finishDistance;
         this.speed = speed;
+        this.tiredSpeed = tiredSpeed;
+        this.tiredStartTime = tiredStartTime;
+        this.tiredSpan = tiredSpan;
     }
 
     protected override void OnEnter()
     {
+        exhaustion = blackboard.GetVariable<float>(VariableNames.EXHAUSTION);
         SetStatusUI("Running away");
         PlaySFX(SFXManager.SFXGroup.KabouterSpotted);
         agent.transform.LookAt(player.transform.position);
-        agent.speed = speed;
     }
 
     protected override TaskStatus OnUpdate()
     {
-        timer += Time.deltaTime;
+        timer += Time.fixedDeltaTime;
+        exhaustion += Time.fixedDeltaTime;
+        float tiredFactor = 0;
+        if (exhaustion > tiredStartTime)
+        {
+            tiredFactor = Mathf.Clamp((exhaustion - tiredStartTime) / tiredSpan, 0, 1);
+        }
+        agent.speed = Mathf.Lerp(speed, tiredSpeed, tiredFactor);
+
         if (timer > waitTime)
         {
             Vector3 dir = (agent.transform.position - player.transform.position).normalized * 5;
@@ -256,5 +275,6 @@ public class BTRunAway : BTBaseNode
     protected override void OnExit()
     {
         timer = 0f;
+        blackboard.SetVariable(VariableNames.EXHAUSTION, exhaustion);
     }
 }

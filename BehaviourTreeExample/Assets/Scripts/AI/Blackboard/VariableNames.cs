@@ -9,6 +9,7 @@ public static class VariableNames
     public const string CAN_ATTACK = "CAN_ATTACK";
     public const string IS_HIDDEN = "IS_HIDDEN";
     public const string IN_VISION = "IN_VISION";
+    public const string EXHAUSTION = "EXHAUSTION";
 
     public const string STATUS_TEXT = "STATUS_TEXT";
     public const string AUDIO_SOURCE = "AUDIO_SOURCE";

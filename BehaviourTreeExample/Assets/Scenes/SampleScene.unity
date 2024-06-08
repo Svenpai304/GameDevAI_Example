@@ -777,6 +777,9 @@ MonoBehaviour:
   runAwaySpeed: 4
   attackingMoveSpeed: 2.2
   keepDistance: 0.05
+  tiredSpeed: 2.5
+  tiredStartTime: 6.5
+  tiredSpan: 6
   wayPoints:
   - {fileID: 263365720}
   - {fileID: 233287682}
@@ -800,12 +803,12 @@ NavMeshAgent:
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 16
-  avoidancePriority: 50
+  avoidancePriority: 99
   m_AngularSpeed: 180
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
-  m_AutoRepath: 1
+  m_AutoRepath: 0
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
@@ -863,7 +866,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.52
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1636,7 +1639,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0.07660997, y: -0, z: -0, w: 0.99706113}
-  m_LocalPosition: {x: 0, y: 2, z: -5}
+  m_LocalPosition: {x: 0, y: 2, z: -8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2871,8 +2874,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daecdc9191b1aa94482594ea20f7e663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotXSpeed: 60
-  rotYSpeed: 60
+  rotXSpeed: 120
+  rotYSpeed: 0
   followTarget: {fileID: 1267729045}
   smoothFollowFactor: 3
 --- !u!4 &1696898269
@@ -2884,7 +2887,7 @@ Transform:
   m_GameObject: {fileID: 1696898267}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.55, y: 0, z: -12.11}
+  m_LocalPosition: {x: -4.55, y: 2.1, z: -12.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

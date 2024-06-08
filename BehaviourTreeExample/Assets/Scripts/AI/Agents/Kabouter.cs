@@ -11,6 +11,7 @@ public class Kabouter : MonoBehaviour
     public float runAwaySpeed;
     public float attackingMoveSpeed;
     public float keepDistance = 1f;
+    public float tiredSpeed, tiredStartTime, tiredSpan;
     public Transform[] wayPoints;
     public GameObject illusionPrefab;
     private BTBaseNode tree;
@@ -36,6 +37,7 @@ public class Kabouter : MonoBehaviour
         blackboard.SetVariable(VariableNames.ENEMY_HEALTH, 1);
         blackboard.SetVariable(VariableNames.TARGET_POSITION, new Vector3(0, 0, 0));
         blackboard.SetVariable(VariableNames.CURRENT_PATROL_INDEX, -1);
+        blackboard.SetVariable(VariableNames.EXHAUSTION, 0f);
         blackboard.SetVariable(VariableNames.IS_HIDDEN, true);
         blackboard.SetVariable(VariableNames.IN_VISION, false);
         blackboard.SetVariable(VariableNames.CAN_ATTACK, false);
@@ -47,12 +49,11 @@ public class Kabouter : MonoBehaviour
                 new ConditionalNode(new BTApproach(agent, player, attackingMoveSpeed, 1), VariableNames.CAN_ATTACK),
                 new ConditionalNode(
                     new BTSequence(
-                        new BTSelectHidingSpot(player, wayPoints, 5),
+                        new BTSelectHidingSpot(player, wayPoints, 12),
                         new BTKabouterMove(agent, player, moveSpeed, VariableNames.TARGET_POSITION, keepDistance),
                         new BTStayHidden(agent, player, wayPoints, 5, 3, illusionPrefab)
-                    ),
-                VariableNames.IS_HIDDEN),
-                new ConditionalNode(new BTRunAway(agent, player, 1, 12, runAwaySpeed), VariableNames.IN_VISION)
+                    ), VariableNames.IS_HIDDEN),
+                new ConditionalNode(new BTRunAway(agent, player, 1, 12, runAwaySpeed, tiredSpeed, tiredStartTime, tiredSpan), VariableNames.IN_VISION)
             );
 
         tree.SetupBlackboard(blackboard);

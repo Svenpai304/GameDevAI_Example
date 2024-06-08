@@ -10,7 +10,7 @@ public class ThirdPersonCamera : MonoBehaviour
     [SerializeField] private float smoothFollowFactor = 4f;
 
     private float angleX = 0;
-    private float angleY = 0;
+    private float angleY = -40;
     // Start is called before the first frame update
     void Start()
     {
