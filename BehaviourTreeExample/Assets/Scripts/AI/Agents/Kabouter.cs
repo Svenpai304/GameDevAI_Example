@@ -54,7 +54,7 @@ public class Kabouter : MonoBehaviour
                 new ConditionalNode(
                     new BTSequence(
                         new BTSelectHidingSpot(player, wayPoints.ToArray(), 12),
-                        new BTKabouterMove(agent, player, moveSpeed, VariableNames.TARGET_POSITION, targetKeepDistance),
+                        new BTKabouterMove(agent, player, moveSpeed, VariableNames.TARGET_POSITION, targetKeepDistance, 10),
                         new BTStayHidden(agent, player, wayPoints.ToArray(), 5, 3, illusionPrefab)
                     ), VariableNames.IS_HIDDEN),
                 new ConditionalNode(new BTRunAway(agent, player, 1, 12, runAwaySpeed, tiredSpeed, tiredStartTime, tiredSpan), VariableNames.IN_VISION)

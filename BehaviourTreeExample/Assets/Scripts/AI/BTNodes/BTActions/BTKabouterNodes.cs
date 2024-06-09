@@ -53,7 +53,7 @@ public class BTSelectHidingSpot : BTBaseNode
 public class BTKabouterMove : BTMoveToPosition
 {
     Player player;
-    public BTKabouterMove(NavMeshAgent agent, Player player, float moveSpeed, string BBtargetPosition, float keepDistance) : base(agent, moveSpeed, BBtargetPosition, keepDistance)
+    public BTKabouterMove(NavMeshAgent agent, Player player, float moveSpeed, string BBtargetPosition, float keepDistance, float minPlayerDistance) : base(agent, moveSpeed, BBtargetPosition, keepDistance)
     {
         this.player = player;
     }
@@ -73,7 +73,25 @@ public class BTKabouterMove : BTMoveToPosition
             return TaskStatus.Success;
         }
 
-        return base.OnUpdate();
+        if (agent == null) { return TaskStatus.Failed; }
+        if (agent.pathPending) { return TaskStatus.Running; }
+        if (agent.hasPath && agent.path.status == NavMeshPathStatus.PathInvalid) { return TaskStatus.Failed; }
+        if (agent.pathEndPosition != targetPosition)
+        {
+            /* // Tried to get custom pathing to work to eventually avoid player
+            NavMeshPath path = new();
+            Vector3 agentPos = new Vector3(agent.transform.position.x, 0, agent.transform.position.z);
+            NavMesh.CalculatePath(agentPos, targetPosition, 0, path);
+            agent.SetPath(path);*/
+
+            agent.SetDestination(targetPosition);
+        }
+
+        if (Mathf.Abs(agent.transform.position.x - targetPosition.x) <= keepDistance && Mathf.Abs(agent.transform.position.z - targetPosition.z) <= keepDistance)
+        {
+            return TaskStatus.Success;
+        }
+        return TaskStatus.Running;
     }
 }
 
@@ -225,6 +243,7 @@ public class BTApproach : BTBaseNode
 public class BTRunAway : BTBaseNode
 {
     private float timer = 0;
+    private float pathUpdateTimer = 0;
     private float exhaustion;
     private NavMeshAgent agent;
     private Player player;
@@ -234,6 +253,10 @@ public class BTRunAway : BTBaseNode
     private float tiredSpeed;
     private float tiredStartTime;
     private float tiredSpan;
+
+    private float playerWeight = 2;
+    //private float edgeWeight = 2;
+    private float pathUpdateTime = 0.2f;
 
     public BTRunAway(NavMeshAgent agent, Player player, float waitTime, float finishDistance, float speed, float tiredSpeed, float tiredStartTime, float tiredSpan)
     {
@@ -258,6 +281,7 @@ public class BTRunAway : BTBaseNode
     protected override TaskStatus OnUpdate()
     {
         timer += Time.fixedDeltaTime;
+        pathUpdateTimer += Time.fixedDeltaTime;
         exhaustion += Time.fixedDeltaTime;
         float tiredFactor = 0;
         if (exhaustion > tiredStartTime)
@@ -266,10 +290,31 @@ public class BTRunAway : BTBaseNode
         }
         agent.speed = Mathf.Lerp(speed, tiredSpeed, tiredFactor);
 
-        if (timer > waitTime)
+        Vector3 agentPos = new Vector3(agent.transform.position.x, 0, agent.transform.position.z);
+        if (timer > waitTime && pathUpdateTimer >= pathUpdateTime)
         {
-            Vector3 dir = (agent.transform.position - player.transform.position).normalized * 5;
-            agent.SetDestination(agent.transform.position + dir);
+            pathUpdateTimer = 0;
+            Vector3 playerAvoidDir = agentPos - player.transform.position;
+            if (playerAvoidDir != Vector3.zero)
+            {
+                playerAvoidDir *= playerWeight / playerAvoidDir.magnitude;
+            }
+            Debug.DrawLine(agent.transform.position, agent.transform.position + playerAvoidDir * 6, Color.green, Time.fixedDeltaTime * 2);
+
+            /* // Sadly doesn't work like that
+            NavMeshHit hit;
+            agent.FindClosestEdge(out hit);
+            Vector3 edgeAvoidDir = agentPos - hit.position;
+            if (edgeAvoidDir != Vector3.zero)
+            {
+                edgeAvoidDir *= edgeWeight / edgeAvoidDir.magnitude;
+            }
+            Debug.DrawLine(agent.transform.position, agent.transform.position + edgeAvoidDir * 6, Color.red, Time.fixedDeltaTime * 2);
+            Vector3 destination = agentPos + (playerAvoidDir + edgeAvoidDir).normalized * 5;
+            */
+            Vector3 destination = agentPos + playerAvoidDir * 5;
+            bool result = agent.SetDestination(destination);
+            Debug.Log(result);
         }
         if (Vector3.Distance(agent.transform.position, player.transform.position) > finishDistance)
         {
