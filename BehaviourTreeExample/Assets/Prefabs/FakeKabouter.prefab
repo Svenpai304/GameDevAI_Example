@@ -64,7 +64,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -148,6 +148,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Peasant Man(1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: f6e30d17caf77ca46913d4bd29745965,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: ce878b857a0f6ac458928a29afac63d7, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

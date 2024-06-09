@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -38,6 +39,7 @@ public class BTSelectHidingSpot : BTBaseNode
         {
             final = Vector3.zero;
         }
+
         Debug.Log("Selected hiding spot: " + final);
         blackboard.SetVariable(VariableNames.TARGET_POSITION, final);
     }
@@ -56,6 +58,11 @@ public class BTKabouterMove : BTMoveToPosition
         this.player = player;
     }
 
+    protected override void OnEnter()
+    {
+        base.OnEnter();
+    }
+
     protected override TaskStatus OnUpdate()
     {
         if (player.CheckPointInVision(agent.transform.position))
@@ -65,6 +72,7 @@ public class BTKabouterMove : BTMoveToPosition
             agent.SetDestination(agent.transform.position);
             return TaskStatus.Success;
         }
+
         return base.OnUpdate();
     }
 }

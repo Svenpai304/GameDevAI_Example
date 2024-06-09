@@ -11,6 +11,7 @@ public class FakeKabouter : MonoBehaviour
     {
         transform.position = position;
         transform.rotation = rotation;
+        GetComponentInChildren<Animator>().CrossFade("Crouch Idle", 0);
     }
 
     private void OnTriggerEnter(Collider other)
