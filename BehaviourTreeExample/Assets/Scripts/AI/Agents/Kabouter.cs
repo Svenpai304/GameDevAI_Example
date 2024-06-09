@@ -85,6 +85,11 @@ public class Kabouter : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Player p = other.GetComponent<Player>();
-        if(p != null) { GameManager.Instance.EndGame(true); }
+        if(p != null) 
+        {
+            audioSource.Stop();
+            audioSource.clip = SFXManager.Instance.GetRandomSFX(SFXManager.SFXGroup.KabouterDefeat);
+            audioSource.Play();
+            GameManager.Instance.EndGame(true); }
     }
 }

@@ -5,6 +5,9 @@ using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// Selects a hiding spot from the given collection, based on distance and line of sight to the player
+/// </summary>
 public class BTSelectHidingSpot : BTBaseNode
 {
     private Player player;
@@ -50,17 +53,33 @@ public class BTSelectHidingSpot : BTBaseNode
     }
 }
 
+/// <summary>
+/// Moves to the target position set in the blackboard, while checking if character is in player's sight
+/// </summary>
 public class BTKabouterMove : BTMoveToPosition
 {
     Player player;
+    NavMeshObstacle playerObstacle;
     public BTKabouterMove(NavMeshAgent agent, Player player, float moveSpeed, string BBtargetPosition, float keepDistance, float minPlayerDistance) : base(agent, moveSpeed, BBtargetPosition, keepDistance)
     {
         this.player = player;
+        playerObstacle = player.GetComponent<NavMeshObstacle>();
     }
 
     protected override void OnEnter()
     {
         base.OnEnter();
+        if (agent.pathEndPosition != targetPosition)
+        {
+            /* // Tried to get custom pathing to work to eventually avoid player
+            NavMeshPath path = new();
+            Vector3 agentPos = new Vector3(agent.transform.position.x, 0, agent.transform.position.z);
+            NavMesh.CalculatePath(agentPos, targetPosition, 0, path);
+            agent.SetPath(path);*/
+            Debug.Log("Setting destination");
+            playerObstacle.enabled = true;
+            agent.SetDestination(targetPosition);
+        }
     }
 
     protected override TaskStatus OnUpdate()
@@ -75,17 +94,8 @@ public class BTKabouterMove : BTMoveToPosition
 
         if (agent == null) { return TaskStatus.Failed; }
         if (agent.pathPending) { return TaskStatus.Running; }
+        else { playerObstacle.enabled = false; }
         if (agent.hasPath && agent.path.status == NavMeshPathStatus.PathInvalid) { return TaskStatus.Failed; }
-        if (agent.pathEndPosition != targetPosition)
-        {
-            /* // Tried to get custom pathing to work to eventually avoid player
-            NavMeshPath path = new();
-            Vector3 agentPos = new Vector3(agent.transform.position.x, 0, agent.transform.position.z);
-            NavMesh.CalculatePath(agentPos, targetPosition, 0, path);
-            agent.SetPath(path);*/
-
-            agent.SetDestination(targetPosition);
-        }
 
         if (Mathf.Abs(agent.transform.position.x - targetPosition.x) <= keepDistance && Mathf.Abs(agent.transform.position.z - targetPosition.z) <= keepDistance)
         {
@@ -95,6 +105,11 @@ public class BTKabouterMove : BTMoveToPosition
     }
 }
 
+/// <summary>
+/// State entered once hiding place is reached. 
+/// Spawns an illusion after some time, which triggers a reposition when found by the player. 
+/// If the player gets close enough without the kabouter being spotted, it enables its attack state.
+/// </summary>
 public class BTStayHidden : BTBaseNode
 {
     private float timer;
@@ -194,6 +209,9 @@ public class BTStayHidden : BTBaseNode
     }
 }
 
+/// <summary>
+/// Moves towards player, and ends the game with a loss when close enough.
+/// </summary>
 public class BTApproach : BTBaseNode
 {
     private NavMeshAgent agent;
@@ -240,6 +258,11 @@ public class BTApproach : BTBaseNode
     }
 }
 
+/// <summary>
+/// Turns and freezes the kabouter after being spotted, then runs directly away from the player.
+/// Movement speed drops if the exhaustion value builds high enough.
+/// </summary>
+
 public class BTRunAway : BTBaseNode
 {
     private float timer = 0;
@@ -255,7 +278,7 @@ public class BTRunAway : BTBaseNode
     private float tiredSpan;
 
     private float playerWeight = 2;
-    //private float edgeWeight = 2;
+    private float edgeWeight = 2;
     private float pathUpdateTime = 0.2f;
 
     public BTRunAway(NavMeshAgent agent, Player player, float waitTime, float finishDistance, float speed, float tiredSpeed, float tiredStartTime, float tiredSpan)
@@ -301,18 +324,17 @@ public class BTRunAway : BTBaseNode
             }
             Debug.DrawLine(agent.transform.position, agent.transform.position + playerAvoidDir * 6, Color.green, Time.fixedDeltaTime * 2);
 
-            /* // Sadly doesn't work like that
-            NavMeshHit hit;
-            agent.FindClosestEdge(out hit);
+            /* 
+            agent.FindClosestEdge(out NavMeshHit hit);
             Vector3 edgeAvoidDir = agentPos - hit.position;
             if (edgeAvoidDir != Vector3.zero)
             {
                 edgeAvoidDir *= edgeWeight / edgeAvoidDir.magnitude;
             }
             Debug.DrawLine(agent.transform.position, agent.transform.position + edgeAvoidDir * 6, Color.red, Time.fixedDeltaTime * 2);
-            Vector3 destination = agentPos + (playerAvoidDir + edgeAvoidDir).normalized * 5;
-            */
+            Vector3 destination = agentPos + (playerAvoidDir + edgeAvoidDir).normalized * 5;*/
             Vector3 destination = agentPos + playerAvoidDir * 5;
+
             bool result = agent.SetDestination(destination);
             Debug.Log(result);
         }
