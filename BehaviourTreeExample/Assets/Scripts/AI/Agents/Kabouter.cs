@@ -2,25 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class Kabouter : MonoBehaviour
 {
+    [Header("Stats")]
     public float moveSpeed = 3;
-    public float runAwaySpeed;
-    public float attackingMoveSpeed;
+    public float hidePlayerDistance = 12;
+    public float illusionSpawnTime, attackDistance, attackHitDistance;
+    public float spottedStunTime;
+    public float runAwayDistance = 10;
+    public float runAwaySpeed = 2;
+    public float attackingMoveSpeed = 3;
     public float targetKeepDistance = 1f;
     public float tiredSpeed, tiredStartTime, tiredSpan;
+
+    [Header("References")]
     public Transform wayPointParent;
     public GameObject illusionPrefab;
+    public TMP_Text statusText;
     private BTBaseNode tree;
     private NavMeshAgent agent;
     private Animator animator;
     private AudioSource audioSource;
-    public TMP_Text statusText;
-
     private Player player;
 
     private void Awake()
@@ -50,14 +55,46 @@ public class Kabouter : MonoBehaviour
 
         tree =
             new BTConditionalSelector(
-                new ConditionalNode(new BTApproach(agent, player, attackingMoveSpeed, 1), VariableNames.CAN_ATTACK),
+                new ConditionalNode(
+                    new BTApproach(
+                        agent,
+                        player,
+                        attackingMoveSpeed,
+                        attackHitDistance
+                        ),
+                    VariableNames.CAN_ATTACK),
                 new ConditionalNode(
                     new BTSequence(
-                        new BTSelectHidingSpot(player, wayPoints.ToArray(), 12),
-                        new BTKabouterMove(agent, player, moveSpeed, VariableNames.TARGET_POSITION, targetKeepDistance, 10),
-                        new BTStayHidden(agent, player, wayPoints.ToArray(), 5, 3, illusionPrefab)
-                    ), VariableNames.IS_HIDDEN),
-                new ConditionalNode(new BTRunAway(agent, player, 1, 12, runAwaySpeed, tiredSpeed, tiredStartTime, tiredSpan), VariableNames.IN_VISION)
+                        new BTSelectHidingSpot(
+                            player,
+                            wayPoints.ToArray(),
+                            hidePlayerDistance),
+                        new BTKabouterMove(
+                            agent,
+                            player,
+                            moveSpeed,
+                            VariableNames.TARGET_POSITION,
+                            targetKeepDistance),
+                        new BTStayHidden(
+                            agent,
+                            player,
+                            wayPoints.ToArray(),
+                            illusionSpawnTime,
+                            attackDistance,
+                            illusionPrefab)
+                        ),
+                    VariableNames.IS_HIDDEN),
+                new ConditionalNode(
+                    new BTRunAway(
+                        agent,
+                        player,
+                        spottedStunTime,
+                        runAwayDistance,
+                        runAwaySpeed,
+                        tiredSpeed,
+                        tiredStartTime,
+                        tiredSpan),
+                    VariableNames.IN_VISION)
             );
 
         tree.SetupBlackboard(blackboard);
@@ -85,11 +122,12 @@ public class Kabouter : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Player p = other.GetComponent<Player>();
-        if(p != null) 
+        if (p != null)
         {
             audioSource.Stop();
             audioSource.clip = SFXManager.Instance.GetRandomSFX(SFXManager.SFXGroup.KabouterDefeat);
             audioSource.Play();
-            GameManager.Instance.EndGame(true); }
+            GameManager.Instance.EndGame(true);
+        }
     }
 }
